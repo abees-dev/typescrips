@@ -30,8 +30,8 @@ exports.UserConflictError = UserConflictError;
 UserConflictError.Msg = 'Duplicate email address';
 UserConflictError.statusCode = http_status_codes_1.default.CONFLICT;
 class ParamMissingError extends CustomError {
-    constructor() {
-        super(ParamMissingError.Msg, ParamMissingError.statusCode);
+    constructor(msg) {
+        super(msg, ParamMissingError.statusCode);
     }
 }
 exports.ParamMissingError = ParamMissingError;

@@ -1,71 +1,42 @@
-import argon2 from 'argon2'
-import RefreshTokenModel from '../models/RefreshToken'
-import UserModel, { IUser } from '../models/User'
-import {
-	ParamMissingError,
-	UnauthorizedError,
-	UserConflictError,
-} from '../shared/errors'
+import UserModel from '../models/User'
+import UserInfoModel, { IUserInfo } from '../models/UserInfo'
+import { ParamMissingError } from '../shared/errors'
+export const createAndUpdate = async (userInfo: IUserInfo) => {
+  const { userId, firstName, lastName, phoneNumber, gender, address } = userInfo
+  if (!userId) {
+    throw new ParamMissingError('Missing the parameter')
+  }
+  const existingUser = await UserModel.findById(userId)
 
-export const regiser = async (user: IUser) => {
-	const { email, password } = user
+  if (existingUser) {
+    const newUserInfo = await UserInfoModel.findOneAndUpdate(
+      { userId: existingUser._id },
+      {
+        userId,
+        firstName,
+        lastName,
+        phoneNumber,
+        gender,
+        address,
+      },
+      { new: true }
+    )
+    return newUserInfo
+  }
+  const newUserInfo = new UserInfoModel({
+    userId,
+    firstName,
+    lastName,
+    phoneNumber,
+    gender,
+    address,
+  })
 
-	if (!email || !password) {
-		throw new ParamMissingError()
-	}
+  await newUserInfo.save()
 
-	const existingUser = await UserModel.findOne({ email })
-	if (existingUser) {
-		throw new UserConflictError()
-	}
-
-	const passwordHash = await argon2.hash(password)
-
-	const newUser = new UserModel({
-		email,
-		password: passwordHash,
-	})
-	await newUser.save()
-
-	return newUser
-}
-
-export const login = async (user: IUser) => {
-	const { email, password } = user
-	const existingUser = await UserModel.findOne({ email })
-
-	if (!email || !password) {
-		throw new ParamMissingError()
-	}
-
-	if (!existingUser) {
-		throw new UnauthorizedError('Incorrect email or password')
-	}
-
-	const isValidPassword = await argon2.verify(existingUser.password, password)
-
-	if (!isValidPassword) {
-		throw new UnauthorizedError('Incorrect email or password')
-	}
-
-	return existingUser
-}
-
-export const setToken = async (token: string, userId: string) => {
-	const refreshToken = await RefreshTokenModel.findOne({ userId })
-	if (!refreshToken) {
-		const newFreshToken = new RefreshTokenModel({
-			userId,
-			refreshToken: token,
-		})
-
-		await newFreshToken.save()
-	} else {
-		await RefreshTokenModel.findOneAndUpdate(
-			{ userId },
-			{
-				refreshToken: token,
-			}
-		)
-	}
+  const userUpdate = await UserModel.findByIdAndUpdate(userId, {
+    info: newUserInfo._id,
+  })
+  console.log(userUpdate)
+  return newUserInfo
 }

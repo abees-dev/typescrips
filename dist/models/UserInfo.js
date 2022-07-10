@@ -9,42 +9,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.User = void 0;
+exports.UserInfo = void 0;
 const typegoose_1 = require("@typegoose/typegoose");
 const defaultClasses_1 = require("@typegoose/typegoose/lib/defaultClasses");
-const Role_1 = require("./Role");
-const UserInfo_1 = require("./UserInfo");
-class User extends defaultClasses_1.TimeStamps {
-    static async findByEmail(email) {
-        return this.findOne({ email }).exec();
-    }
-    static async updateUserParameters(query, data) {
-        return this.findOneAndUpdate(query, { data }, { new: true });
-    }
-    static async getUserByIdPopulate(id) {
-        return this.findById(id)
-            .populate({ path: 'info', select: '-userId' })
-            .select('-password')
-            .exec();
-    }
+var Gender;
+(function (Gender) {
+    Gender["male"] = "male";
+    Gender["female"] = "female";
+})(Gender || (Gender = {}));
+class UserInfo extends defaultClasses_1.TimeStamps {
 }
 __decorate([
     (0, typegoose_1.Prop)({ unique: true, required: true }),
     __metadata("design:type", String)
-], User.prototype, "email", void 0);
+], UserInfo.prototype, "userId", void 0);
 __decorate([
     (0, typegoose_1.Prop)(),
     __metadata("design:type", String)
-], User.prototype, "password", void 0);
+], UserInfo.prototype, "firstName", void 0);
 __decorate([
-    (0, typegoose_1.Prop)({ ref: () => Role_1.Role, type: () => String }),
-    __metadata("design:type", Object)
-], User.prototype, "role", void 0);
+    (0, typegoose_1.Prop)(),
+    __metadata("design:type", String)
+], UserInfo.prototype, "lastName", void 0);
 __decorate([
-    (0, typegoose_1.Prop)({ ref: () => UserInfo_1.UserInfo }),
-    __metadata("design:type", Object)
-], User.prototype, "info", void 0);
-exports.User = User;
-const UserModel = (0, typegoose_1.getModelForClass)(User);
-exports.default = UserModel;
-//# sourceMappingURL=User.js.map
+    (0, typegoose_1.Prop)(),
+    __metadata("design:type", String)
+], UserInfo.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, typegoose_1.Prop)({ enum: Gender }),
+    __metadata("design:type", String)
+], UserInfo.prototype, "gender", void 0);
+__decorate([
+    (0, typegoose_1.Prop)(),
+    __metadata("design:type", Date)
+], UserInfo.prototype, "dateOfBirth", void 0);
+__decorate([
+    (0, typegoose_1.Prop)(),
+    __metadata("design:type", String)
+], UserInfo.prototype, "address", void 0);
+exports.UserInfo = UserInfo;
+const UserInfoModel = (0, typegoose_1.getModelForClass)(UserInfo);
+exports.default = UserInfoModel;
+//# sourceMappingURL=UserInfo.js.map
