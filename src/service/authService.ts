@@ -1,11 +1,17 @@
 import argon2 from 'argon2'
+import RoleModel, { Role } from '../models/Role'
 import RefreshTokenModel from '../models/RefreshToken'
 import UserModel, { IUser, User } from '../models/User'
-import {
-  ParamMissingError,
-  UnauthorizedError,
-  UserConflictError,
-} from '../shared/errors'
+import { ParamMissingError, UnauthorizedError, UserConflictError } from '../shared/errors'
+import { IObjectWithTypegooseFunction } from '@typegoose/typegoose/lib/types'
+import { Types } from 'mongoose'
+
+type RoleModelType =
+  | (Role &
+      IObjectWithTypegooseFunction & {
+        _id: Types.ObjectId
+      })
+  | any
 
 // Regiser
 export const regiser = async (user: IUser): Promise<User> => {
@@ -17,6 +23,8 @@ export const regiser = async (user: IUser): Promise<User> => {
 
   const existingUser = await UserModel.findByEmail(email)
 
+  const role: RoleModelType = await RoleModel.findOne({ name: 'User' })
+
   if (existingUser) {
     throw new UserConflictError()
   }
@@ -26,6 +34,7 @@ export const regiser = async (user: IUser): Promise<User> => {
   const newUser: any = new UserModel({
     email,
     password: passwordHash,
+    role: role._id,
   })
   await newUser.save()
 
@@ -52,8 +61,9 @@ export const login = async (user: IUser): Promise<User> => {
     throw new UnauthorizedError('Incorrect email or password')
   }
 
-  const { password: newPass, ...other } = existingUser._doc
-  return other
+  const populateUser: any = await UserModel.getUserByIdPopulate(existingUser._id)
+
+  return populateUser
 }
 
 export const setToken = async (token: string, userId: string) => {

@@ -8,11 +8,11 @@ export class CustomError extends Error {
   }
 }
 
-export class UserNotFoundError extends CustomError {
+export class NotFoundError extends CustomError {
   public static readonly Msg = 'User is not on the system'
   public static readonly statusCode = HttpStatusCodes.NOT_FOUND
-  constructor() {
-    super(UserNotFoundError.Msg, UserNotFoundError.statusCode)
+  constructor(msg: string) {
+    super(msg, NotFoundError.statusCode)
   }
 }
 

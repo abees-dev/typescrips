@@ -2,7 +2,7 @@ import { getModelForClass, Prop } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 
 export interface IRole {
-  _id: { [x: string]: any }
+  // _id: { [x: string]: any }
   name: string
 }
 

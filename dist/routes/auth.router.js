@@ -22,9 +22,7 @@ router.post('/register', async (req, res) => {
         });
     }
     catch (error) {
-        return res
-            .status(error.statusCode)
-            .json({ code: error.statusCode, message: error.message });
+        return res.status(error.statusCode).json({ code: error.statusCode, message: error.message });
     }
 });
 router.post('/login', async (req, res) => {
@@ -48,9 +46,7 @@ router.post('/login', async (req, res) => {
     }
     catch (error) {
         return (error === null || error === void 0 ? void 0 : error.statusCode)
-            ? res
-                .status(error.statusCode)
-                .json({ code: error.statusCode, message: error.message })
+            ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
             : res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
                 code: http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR,
                 message: error.message,
@@ -68,9 +64,7 @@ router.post('/refresh-token', async (req, res) => {
         const payload = jsonwebtoken_1.default.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
         const existingUser = await User_1.default.findById(payload.userId);
         if (!existingUser)
-            return res
-                .status(http_status_codes_1.StatusCodes.NOT_FOUND)
-                .json({ code: http_status_codes_1.StatusCodes.NOT_FOUND, message: 'User Not Found' });
+            return res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({ code: http_status_codes_1.StatusCodes.NOT_FOUND, message: 'User Not Found' });
         const newRefreshToken = (0, authentication_2.generateRefreshToken)(existingUser);
         const newAccessToken = (0, authentication_1.generateAccessToken)(existingUser);
         (0, authService_1.setToken)(newRefreshToken, payload.userId);

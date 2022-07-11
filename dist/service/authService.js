@@ -16,6 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setToken = exports.login = exports.regiser = void 0;
 const argon2_1 = __importDefault(require("argon2"));
+const Role_1 = __importDefault(require("../models/Role"));
 const RefreshToken_1 = __importDefault(require("../models/RefreshToken"));
 const User_1 = __importDefault(require("../models/User"));
 const errors_1 = require("../shared/errors");
@@ -25,6 +26,7 @@ const regiser = async (user) => {
         throw new errors_1.ParamMissingError('Missing email or password');
     }
     const existingUser = await User_1.default.findByEmail(email);
+    const role = await Role_1.default.findOne({ name: 'User' });
     if (existingUser) {
         throw new errors_1.UserConflictError();
     }
@@ -32,6 +34,7 @@ const regiser = async (user) => {
     const newUser = new User_1.default({
         email,
         password: passwordHash,
+        role: role._id,
     });
     await newUser.save();
     const _a = newUser._doc, { password: newPass } = _a, other = __rest(_a, ["password"]);
@@ -51,8 +54,8 @@ const login = async (user) => {
     if (!isValidPassword) {
         throw new errors_1.UnauthorizedError('Incorrect email or password');
     }
-    const _a = existingUser._doc, { password: newPass } = _a, other = __rest(_a, ["password"]);
-    return other;
+    const populateUser = await User_1.default.getUserByIdPopulate(existingUser._id);
+    return populateUser;
 };
 exports.login = login;
 const setToken = async (token, userId) => {

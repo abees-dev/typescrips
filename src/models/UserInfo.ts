@@ -1,7 +1,7 @@
-import { getModelForClass, Prop } from '@typegoose/typegoose'
+import { getModelForClass, mongoose, Prop, ReturnModelType } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 
-export interface IUserInfo {
+export interface IUserInfo extends Document {
   userId: string
   firstName: string
   lastName: string
@@ -9,6 +9,10 @@ export interface IUserInfo {
   gender: Gender
   dateOfBirth: Date
   address: string
+  avatar: {
+    url: string
+    public_id: string
+  }
 }
 
 enum Gender {
@@ -35,10 +39,16 @@ export class UserInfo extends TimeStamps {
   @Prop()
   dateOfBirth: Date
 
+  @Prop({ type: () => mongoose.Schema.Types.Map })
+  avatar: {
+    url: string
+    public_id: string
+  }
+
   @Prop()
   address: string
 }
 
-const UserInfoModel = getModelForClass(UserInfo)
+const UserInfoModel: ReturnModelType<typeof UserInfo> = getModelForClass(UserInfo)
 
 export default UserInfoModel

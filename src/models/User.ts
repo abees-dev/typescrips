@@ -1,9 +1,4 @@
-import {
-  getModelForClass,
-  Prop,
-  Ref,
-  ReturnModelType,
-} from '@typegoose/typegoose'
+import { getModelForClass, Prop, Ref, ReturnModelType } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Role } from './Role'
 import { IUserInfo, UserInfo } from './UserInfo'
@@ -35,27 +30,18 @@ export class User extends TimeStamps {
   @Prop({ ref: () => UserInfo })
   info?: Ref<UserInfo>
 
-  public static async findByEmail(
-    this: ReturnModelType<typeof User>,
-    email: string
-  ) {
+  public static async findByEmail(this: ReturnModelType<typeof User>, email: string) {
     return this.findOne({ email }).exec()
   }
 
-  public static async updateUserParameters(
-    this: ReturnModelType<typeof User>,
-    query: Field,
-    data: IUser
-  ) {
+  public static async updateUserParameters(this: ReturnModelType<typeof User>, query: Field, data: IUser) {
     return this.findOneAndUpdate(query, { data }, { new: true })
   }
 
-  public static async getUserByIdPopulate(
-    this: ReturnModelType<typeof User>,
-    id: string
-  ) {
+  public static async getUserByIdPopulate(this: ReturnModelType<typeof User>, id: string) {
     return this.findById(id)
       .populate({ path: 'info', select: '-userId' })
+      .populate({ path: 'role', select: '_id, name' })
       .select('-password')
       .exec()
   }

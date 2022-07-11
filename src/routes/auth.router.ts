@@ -19,9 +19,7 @@ router.post('/register', async (req: Request, res: Response) => {
       user,
     })
   } catch (error) {
-    return res
-      .status(error.statusCode)
-      .json({ code: error.statusCode, message: error.message })
+    return res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
   }
 })
 
@@ -50,9 +48,7 @@ router.post('/login', async (req: Request, res: Response) => {
     })
   } catch (error) {
     return error?.statusCode
-      ? res
-          .status(error.statusCode)
-          .json({ code: error.statusCode, message: error.message })
+      ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
       : res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
           code: StatusCodes.INTERNAL_SERVER_ERROR,
           message: error.message,
@@ -68,15 +64,10 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
         code: StatusCodes.UNAUTHORIZED,
         message: 'You are not authenticated',
       })
-    const payload = jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as Secret
-    ) as JwtPayload
+    const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as Secret) as JwtPayload
     const existingUser = await UserModel.findById(payload.userId)
     if (!existingUser)
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ code: StatusCodes.NOT_FOUND, message: 'User Not Found' })
+      return res.status(StatusCodes.NOT_FOUND).json({ code: StatusCodes.NOT_FOUND, message: 'User Not Found' })
     const newRefreshToken = generateRefreshToken(existingUser)
     const newAccessToken = generateAccessToken(existingUser)
     setToken(newRefreshToken, payload.userId)

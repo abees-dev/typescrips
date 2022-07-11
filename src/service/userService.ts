@@ -1,42 +1,65 @@
+import { IObjectWithTypegooseFunction } from '@typegoose/typegoose/lib/types'
+import { isString } from 'lodash'
+import { isValidObjectId, Types } from 'mongoose'
 import UserModel from '../models/User'
-import UserInfoModel, { IUserInfo } from '../models/UserInfo'
-import { ParamMissingError } from '../shared/errors'
-export const createAndUpdate = async (userInfo: IUserInfo) => {
-  const { userId, firstName, lastName, phoneNumber, gender, address } = userInfo
+import UserInfoModel, { IUserInfo, UserInfo } from '../models/UserInfo'
+import { ParamMissingError, UnauthorizedError, NotFoundError } from '../shared/errors'
+import cloudinary from '../utils/cloudinary'
+
+type ReturnModelType = UserInfo &
+  IObjectWithTypegooseFunction & {
+    _id: Types.ObjectId
+  }
+
+export const createAndUpdate = async (userInfo: IUserInfo, file?: any): Promise<ReturnModelType> => {
+  const { userId } = userInfo
+
   if (!userId) {
     throw new ParamMissingError('Missing the parameter')
   }
+
+  if (!isValidObjectId(userId)) {
+    throw new NotFoundError('This account does not exist on the system')
+  }
+
   const existingUser = await UserModel.findById(userId)
 
-  if (existingUser) {
-    const newUserInfo = await UserInfoModel.findOneAndUpdate(
-      { userId: existingUser._id },
-      {
-        userId,
-        firstName,
-        lastName,
-        phoneNumber,
-        gender,
-        address,
-      },
-      { new: true }
-    )
-    return newUserInfo
+  if (!existingUser) {
+    throw new UnauthorizedError('User is not authenticated')
   }
-  const newUserInfo = new UserInfoModel({
-    userId,
-    firstName,
-    lastName,
-    phoneNumber,
-    gender,
-    address,
-  })
+
+  const existingUserInfo = await UserInfoModel.findOne({ userId })
+
+  const uploader: any =
+    isString(file) &&
+    file &&
+    (await cloudinary.uploader.upload(file, {
+      overwrite: true,
+      public_id: userId,
+    }))
+
+  const update: IUserInfo = uploader
+    ? {
+        ...userInfo,
+        avatar: {
+          url: uploader?.secure_url,
+          public_id: uploader?.public_id,
+        },
+      }
+    : userInfo
+
+  if (existingUserInfo) {
+    const userInfoUpdate: any = await UserInfoModel.findOneAndUpdate({ userId }, update, {
+      new: true,
+    })
+    return userInfoUpdate
+  }
+  const newUserInfo = new UserInfoModel(update)
 
   await newUserInfo.save()
 
-  const userUpdate = await UserModel.findByIdAndUpdate(userId, {
+  await UserModel.findByIdAndUpdate(userId, {
     info: newUserInfo._id,
   })
-  console.log(userUpdate)
   return newUserInfo
 }

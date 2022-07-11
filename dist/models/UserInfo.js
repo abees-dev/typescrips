@@ -44,6 +44,10 @@ __decorate([
     __metadata("design:type", Date)
 ], UserInfo.prototype, "dateOfBirth", void 0);
 __decorate([
+    (0, typegoose_1.Prop)({ type: () => typegoose_1.mongoose.Schema.Types.Map }),
+    __metadata("design:type", Object)
+], UserInfo.prototype, "avatar", void 0);
+__decorate([
     (0, typegoose_1.Prop)(),
     __metadata("design:type", String)
 ], UserInfo.prototype, "address", void 0);

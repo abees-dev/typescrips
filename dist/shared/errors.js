@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UnauthorizedError = exports.ParamMissingError = exports.UserConflictError = exports.UserNotFoundError = exports.CustomError = void 0;
+exports.UnauthorizedError = exports.ParamMissingError = exports.UserConflictError = exports.NotFoundError = exports.CustomError = void 0;
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 class CustomError extends Error {
     constructor(msg, code) {
@@ -13,14 +13,14 @@ class CustomError extends Error {
     }
 }
 exports.CustomError = CustomError;
-class UserNotFoundError extends CustomError {
-    constructor() {
-        super(UserNotFoundError.Msg, UserNotFoundError.statusCode);
+class NotFoundError extends CustomError {
+    constructor(msg) {
+        super(msg, NotFoundError.statusCode);
     }
 }
-exports.UserNotFoundError = UserNotFoundError;
-UserNotFoundError.Msg = 'User is not on the system';
-UserNotFoundError.statusCode = http_status_codes_1.default.NOT_FOUND;
+exports.NotFoundError = NotFoundError;
+NotFoundError.Msg = 'User is not on the system';
+NotFoundError.statusCode = http_status_codes_1.default.NOT_FOUND;
 class UserConflictError extends CustomError {
     constructor() {
         super(UserConflictError.Msg, UserConflictError.statusCode);

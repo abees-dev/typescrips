@@ -24,6 +24,7 @@ class User extends defaultClasses_1.TimeStamps {
     static async getUserByIdPopulate(id) {
         return this.findById(id)
             .populate({ path: 'info', select: '-userId' })
+            .populate({ path: 'role', select: '_id, name' })
             .select('-password')
             .exec();
     }
