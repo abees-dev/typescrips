@@ -40,7 +40,44 @@ router.post('/create', upload.single('file'), async (req, res) => {
         const body = req.body;
         const file = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
         const newPost = await (0, postService_1.createPost)(body, file);
-        return res.status(http_status_codes_1.StatusCodes.OK).json({ code: http_status_codes_1.StatusCodes.OK, message: 'Create Post successfully', post: newPost });
+        return res
+            .status(http_status_codes_1.StatusCodes.CREATED)
+            .json({ code: http_status_codes_1.StatusCodes.CREATED, message: 'Create Post successfully', post: newPost });
+    }
+    catch (error) {
+        return (error === null || error === void 0 ? void 0 : error.statusCode)
+            ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
+            : res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                code: http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR,
+                message: error.message,
+            });
+    }
+});
+router.patch('/update/:id', upload.single('file'), async (req, res) => {
+    var _a;
+    try {
+        const id = req.params.id;
+        const body = req.body;
+        const file = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
+        const post = await (0, postService_1.updatePost)(id, body, file);
+        return res
+            .status(http_status_codes_1.StatusCodes.ACCEPTED)
+            .json({ code: http_status_codes_1.StatusCodes.ACCEPTED, message: 'Update post successfully', post });
+    }
+    catch (error) {
+        return (error === null || error === void 0 ? void 0 : error.statusCode)
+            ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
+            : res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                code: http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR,
+                message: error.message,
+            });
+    }
+});
+router.delete('/delete', async (req, res) => {
+    try {
+        const id = req.query.id;
+        await (0, postService_1.deletePost)(id);
+        return res.status(http_status_codes_1.StatusCodes.OK).json({ code: http_status_codes_1.StatusCodes.OK, message: 'Delete post successfully' });
     }
     catch (error) {
         return (error === null || error === void 0 ? void 0 : error.statusCode)

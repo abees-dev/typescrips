@@ -1,4 +1,4 @@
-import { createPost, getPostByUserID } from '../service/postService'
+import { createPost, deletePost, getPostByUserID, updatePost } from '../service/postService'
 import { Request, Response, Router } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import multer, { diskStorage } from 'multer'
@@ -15,7 +15,45 @@ router.post('/create', upload.single('file'), async (req: Request, res: Response
 
     const newPost = await createPost(body, file)
 
-    return res.status(StatusCodes.OK).json({ code: StatusCodes.OK, message: 'Create Post successfully', post: newPost })
+    return res
+      .status(StatusCodes.CREATED)
+      .json({ code: StatusCodes.CREATED, message: 'Create Post successfully', post: newPost })
+  } catch (error) {
+    return error?.statusCode
+      ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
+      : res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          code: StatusCodes.INTERNAL_SERVER_ERROR,
+          message: error.message,
+        })
+  }
+})
+
+router.patch('/update/:id', upload.single('file'), async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id
+    const body = req.body
+    const file: string | undefined = req.file?.path
+    const post = await updatePost(id, body, file)
+
+    return res
+      .status(StatusCodes.ACCEPTED)
+      .json({ code: StatusCodes.ACCEPTED, message: 'Update post successfully', post })
+  } catch (error) {
+    return error?.statusCode
+      ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
+      : res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+          code: StatusCodes.INTERNAL_SERVER_ERROR,
+          message: error.message,
+        })
+  }
+})
+
+router.delete('/delete', async (req: Request, res: Response) => {
+  try {
+    const id: string = req.query.id as string
+    await deletePost(id)
+
+    return res.status(StatusCodes.OK).json({ code: StatusCodes.OK, message: 'Delete post successfully' })
   } catch (error) {
     return error?.statusCode
       ? res.status(error.statusCode).json({ code: error.statusCode, message: error.message })
